@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Spotguide chart for kubeflow
+name: spotguide-kubeflow
+version: 1.0.0

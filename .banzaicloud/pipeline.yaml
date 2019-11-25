@@ -1,0 +1,28 @@
+pipeline:
+
+  install_kubeflow:
+      image: banzaicloud/deploy-kubeflow:dev
+      commands:
+        - backyards istio install -f /opt/kubeflow/mesh.yaml
+        - helm tiller run "$NAMESPACE" -- helm install --namespace enterprise-gateway --set ingress.enabled=false --set image=banzaicloud/enterprise-gateway:dev /opt/enterprise-gateway
+        - cd /opt/kubeflow/app
+        - export INSTALL_ISTIO="false"
+        - kfctl apply all -V
+
+  package_application:
+    image: lachlanevenson/k8s-helm:latest
+    commands:
+      - helm init -c
+      - helm package ./.banzaicloud/charts/spotguide-kubeflow
+
+  deploy_application:
+    image: banzaicloud/ci-pipeline-client:0.11
+    action: EnsureDeployment
+    deployment:
+      name: './spotguide-kubeflow-1.0.0.tgz'
+      releaseName: '{{ .CICD_REPO_NAME }}'
+      values:
+        banzaicloud:
+          secret:
+            historyServer:
+            zeppelin:

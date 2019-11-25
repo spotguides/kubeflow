@@ -1,0 +1,11 @@
+# available when running the deployment in Pipeline CI
+banzaicloud:
+ tags: []
+ organization:
+   name:
+ cluster:
+   id:
+   name:
+   cloud:
+   distribution:
+   location:
