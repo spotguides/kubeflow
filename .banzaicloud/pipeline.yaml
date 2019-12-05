@@ -1,13 +1,19 @@
 pipeline:
 
+  get_cluster_config:
+    client:
+      kubeconfig: ./kubeconfig.yaml
+    image: banzaicloud/ci-pipeline-client:dev
+    action: GetCluster
+
   install_kubeflow:
-      image: banzaicloud/deploy-kubeflow:dev
-      commands:
-        - backyards istio install -f /opt/kubeflow/mesh.yaml
-        - helm tiller run "$NAMESPACE" -- helm install --namespace enterprise-gateway --set ingress.enabled=false --set image=banzaicloud/enterprise-gateway:dev /opt/enterprise-gateway
-        - cd /opt/kubeflow/app
-        - export INSTALL_ISTIO="false"
-        - kfctl apply all -V
+    image: banzaicloud/deploy-kubeflow:dev
+    commands:
+    - cat ./kubeconfig.yaml
+    - KUBECONFIG=kubeconfig.yaml backyards istio install -f /opt/kubeflow/mesh.yaml
+    - KUBECONFIG=kubeconfig.yaml helm tiller run "$NAMESPACE" -- helm install --namespace enterprise-gateway --set ingress.enabled=false --set image=banzaicloud/enterprise-gateway:dev /opt/enterprise-gateway
+    - cd /opt/kubeflow/app
+    - KUBECONFIG=kubeconfig.yaml INSTALL_ISTIO="false" kfctl apply all -V
 
   package_application:
     image: lachlanevenson/k8s-helm:latest
