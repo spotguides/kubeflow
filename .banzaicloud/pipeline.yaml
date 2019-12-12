@@ -2,21 +2,21 @@ pipeline:
 
   get_cluster_config:
     client:
-      kubeconfig: ./kubeconfig.yaml
+      kubeconfig: /drone/kubeconfig.yaml
     image: banzaicloud/ci-pipeline-client:dev
     action: GetCluster
 
   install_kubeflow:
     image: banzaicloud/deploy-kubeflow:dev
     commands:
-    - cat ./kubeconfig.yaml
-    - KUBECONFIG=kubeconfig.yaml backyards istio install -f /opt/kubeflow/mesh.yaml
-    - KUBECONFIG=kubeconfig.yaml helm tiller run "$NAMESPACE" -- helm install --namespace enterprise-gateway --set ingress.enabled=false --set image=banzaicloud/enterprise-gateway:dev /opt/enterprise-gateway
+    - cat /drone/kubeconfig.yaml
+    - pwd
+    - KUBECONFIG=/drone/kubeconfig.yaml backyards istio install -f /opt/kubeflow/mesh.yaml
     - cd /opt/kubeflow/app
-    - KUBECONFIG=kubeconfig.yaml INSTALL_ISTIO="false" kfctl apply all -V
+    - KUBECONFIG=/drone/kubeconfig.yaml INSTALL_ISTIO="false" kfctl apply all -V
 
   package_application:
-    image: lachlanevenson/k8s-helm:latest
+    image: lachlanevenson/k8s-helm:v2.16.1
     commands:
       - helm init -c
       - helm package ./.banzaicloud/charts/spotguide-kubeflow
@@ -28,7 +28,6 @@ pipeline:
       name: './spotguide-kubeflow-1.0.0.tgz'
       releaseName: '{{ .CICD_REPO_NAME }}'
       values:
-        banzaicloud:
-          secret:
-            historyServer:
-            zeppelin:
+        enterprise-gateway:
+          image: banzaicloud/enterprise-gateway:dev
+          ingress.enabled: false
