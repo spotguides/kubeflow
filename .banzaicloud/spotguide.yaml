@@ -13,15 +13,10 @@ questions:
 - type: pipeline
   dataType: string
   label: 'Kubeflow Namespace'
+  default: 'kubeflow'
   required: true
   targets:
-    - deploy_application.deployment.values.banzaicloud.kubeflow.namespace
-- type: pipeline
-  dataType: string
-  label: 'Istio Namespace'
-  required: true
-  targets:
-    - deploy_application.deployment.namespace
+    - deploy_application.deployment.values.banzaicloud.enterpriseGateway.namespace
 - type: pipeline
   dataType: boolean
   default: true
@@ -30,16 +25,6 @@ questions:
   key: enterpriseGateway
   targets:
     - deployment.values.banzaicloud.enterpriseGateway.enabled
-- type: pipeline
-  dataType: string
-  label: 'Jupyter Enterprise Gateway Namespace'
-  required: true
-  showIf:
-    properties:
-      enterpriseGateway:
-        const: true
-  targets:
-    - deploy_application.deployment.values.banzaicloud.enterpriseGateway.namespace
 - type: pipeline
   dataType: boolean
   default: true
