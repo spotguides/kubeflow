@@ -21,7 +21,7 @@ questions:
   label: 'Istio Namespace'
   required: true
   targets:
-    - deploy_application.deployment.namespace
+    - deploy_application.deployment.values.banzaicloud.enterpriseGateway.namespace
 - type: pipeline
   dataType: boolean
   default: true
@@ -39,7 +39,7 @@ questions:
       enterpriseGateway:
         const: true
   targets:
-    - deploy_application.deployment.values.banzaicloud.enterpriseGateway.namespace
+    - deploy_application.deployment.namespace
 - type: pipeline
   dataType: boolean
   default: true
