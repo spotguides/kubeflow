@@ -1,5 +1,15 @@
 pipeline:
 
+  install_kubeflow_auth_secrets:
+    image: banzaicloud/ci-pipeline-client:0.12
+    action: InstallSecret
+    clusterSecret:
+      # sourceSecretName:
+      name: '{{ .CICD_REPO_NAME }}-kubeflow-auth'
+      namespace: default
+      merge: true
+      spec: []
+
   get_cluster_config:
     client:
       kubeconfig: /drone/kubeconfig.yaml
@@ -13,8 +23,10 @@ pipeline:
     - pwd
     - KUBECONFIG=/drone/kubeconfig.yaml backyards istio install -f /opt/kubeflow/mesh.yaml
     - cd /opt/kubeflow/app
+    - KUBEFLOW_PASSWORD=$(KUBECONFIG=/drone/kubeconfig.yaml kubectl get secret '{{ .CICD_REPO_NAME }}-kubeflow-auth' -o json | jq -r .data.password)
+    - export
     - KUBECONFIG=/drone/kubeconfig.yaml INSTALL_ISTIO="false" kfctl apply all -V
-
+    
   package_application:
     image: lachlanevenson/k8s-helm:v2.16.1
     commands:
@@ -22,7 +34,7 @@ pipeline:
       - helm package ./.banzaicloud/charts/spotguide-kubeflow
 
   deploy_application:
-    image: banzaicloud/ci-pipeline-client:0.11
+    image: banzaicloud/ci-pipeline-client:0.12
     action: EnsureDeployment
     deployment:
       name: './spotguide-kubeflow-1.0.0.tgz'

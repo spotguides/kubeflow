@@ -17,22 +17,35 @@ questions:
   required: true
   targets:
     - deploy_application.deployment.values.banzaicloud.enterpriseGateway.namespace
+    - install_kubeflow_auth_secrets.clusterSecret.namespace
 - type: pipeline
   dataType: boolean
   default: true
-  label: 'Jupyter Enterprise Gateway'
+  label: 'Install Jupyter Enterprise Gateway'
   required: true
   key: enterpriseGateway
   targets:
     - deployment.values.banzaicloud.enterpriseGateway.enabled
 - type: pipeline
   dataType: boolean
-  default: true
+  default: false
   label: 'Use external OIDC provider'
   required: true
   key: externalOidcProvider
   targets:
     - deployment.values.banzaicloud.externalOidcProvider.enabled
+- type: secret
+  dataType: password
+  name: kubeflowpass
+  required: true
+  showIf:
+    properties:
+      externalOidcProvider:
+        const: false
+  label: 'Kubeflow auth credentials'
+  targets:
+    - name: install_kubeflow_auth_secrets.clusterSecret.sourceSecretName
+    - name: deploy_application.deployment.values.banzaicloud.secret.zeppelin
 - type: pipeline
   dataType: string
   label: 'OIDC Endpoint'
