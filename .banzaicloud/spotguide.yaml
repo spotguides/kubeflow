@@ -18,6 +18,7 @@ questions:
   targets:
     - deploy_application.deployment.values.banzaicloud.enterpriseGateway.namespace
     - install_kubeflow_auth_secrets.clusterSecret.namespace
+    - install_kubeflow.namespace
 - type: pipeline
   dataType: boolean
   default: true

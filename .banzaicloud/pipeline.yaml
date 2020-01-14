@@ -19,14 +19,14 @@ pipeline:
   install_kubeflow:
     image: banzaicloud/deploy-kubeflow:dev
     commands:
-    - cat /drone/kubeconfig.yaml
-    - pwd
     - KUBECONFIG=/drone/kubeconfig.yaml backyards istio install -f /opt/kubeflow/mesh.yaml
+    - KUBECONFIG=/drone/kubeconfig.yaml
     - cd /opt/kubeflow/app
-    - KUBEFLOW_PASSWORD=$(KUBECONFIG=/drone/kubeconfig.yaml kubectl get secret '{{ .CICD_REPO_NAME }}-kubeflow-auth' -o json | jq -r .data.password)
+    - KUBEFLOW_PASSWORD=$(KUBECONFIG=/drone/kubeconfig.yaml kubectl get secret '{{ .CICD_REPO_NAME }}-kubeflow-auth' -n kubeflow -o yaml | yq r - data.password | base64 -d)
+    - KUBEFLOW_USER_EMAIL=$(KUBECONFIG=/drone/kubeconfig.yaml kubectl get secret '{{ .CICD_REPO_NAME }}-kubeflow-auth' -n kubeflow -o yaml | yq r - data.username | base64 -d)
     - export
     - KUBECONFIG=/drone/kubeconfig.yaml INSTALL_ISTIO="false" kfctl apply all -V
-    
+
   package_application:
     image: lachlanevenson/k8s-helm:v2.16.1
     commands:
