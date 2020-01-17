@@ -16,11 +16,16 @@ pipeline:
     image: banzaicloud/ci-pipeline-client:dev
     action: GetCluster
 
-  install_kubeflow:
+  install_istio:
     image: banzaicloud/deploy-kubeflow:dev
     commands:
     - KUBECONFIG='/drone/kubeconfig.yaml'
     - backyards istio install -f /opt/kubeflow/mesh.yaml
+
+  install_kubeflow:
+    image: banzaicloud/deploy-kubeflow:dev
+    commands:
+    - KUBECONFIG='/drone/kubeconfig.yaml'
     - cd /opt/kubeflow/app
     - KUBEFLOW_PASSWORD=$(KUBECONFIG=/drone/kubeconfig.yaml kubectl get secret '{{ .CICD_REPO_NAME }}-kubeflow-auth' -n kubeflow -o yaml | yq r - data.password | base64 -d)
     - KUBEFLOW_USER_EMAIL=$(KUBECONFIG=/drone/kubeconfig.yaml kubectl get secret '{{ .CICD_REPO_NAME }}-kubeflow-auth' -n kubeflow -o yaml | yq r - data.username | base64 -d)
